@@ -3,7 +3,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import type {FormEvent} from 'react';
 import type {Company} from './page';
 import {getSupabase} from '../lib/supabase';
-import {LayoutDashboard,CalendarDays,ClipboardList,Users,UserRound,BriefcaseBusiness,Clock3,CalendarOff,CalendarSync,Globe,Settings2,BarChart3,Bell,LogOut,Plus,RefreshCcw,Search,ExternalLink,Copy,Check,AlertCircle,Menu,X,ChevronRight,CheckCircle2,ArrowUpRight} from 'lucide-react';
+import {CalendarCheck2,LayoutDashboard,CalendarDays,ClipboardList,Users,UserRound,BriefcaseBusiness,Clock3,CalendarOff,CalendarSync,Globe,Settings2,BarChart3,Bell,LogOut,Plus,RefreshCcw,Search,ExternalLink,Copy,Check,AlertCircle,Menu,X,ChevronRight,CheckCircle2,ArrowUpRight} from 'lucide-react';
 type Employee={id:string;name:string;email:string|null;active:boolean};
 type Service={id:string;name:string;description:string|null;duration_minutes:number;buffer_before_minutes:number;buffer_after_minutes:number;active:boolean};
 type Booking={id:string;employee_id:string;service_id:string;starts_at:string;ends_at:string;customer_name:string;customer_email:string;customer_phone:string|null;status:string};
