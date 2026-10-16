@@ -26,3 +26,55 @@
 .shift-pill button{background:transparent;border:0;color:inherit;display:flex;padding:0}
 .employee-form .form-stack{border-top:1px solid #e2e9f0;padding-top:16px;margin-top:10px}
 @media(max-width:560px){.employee-day{align-items:flex-start;flex-direction:column}.employee-shifts{justify-content:flex-start}.employee-tab{flex:1 1 auto}}
+
+/* Booking SaaS v0.3.2 – visual weekly calendar */
+.week-calendar{background:#fff;border:1px solid var(--border);border-radius:17px;overflow:hidden;box-shadow:0 3px 14px #17263d07}
+.week-toolbar{padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.week-toolbar-left,.week-toolbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.week-toolbar-left>strong{font-size:16px;color:var(--text)}
+.week-controls{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.week-controls button{min-height:35px;border:0;background:white;padding:7px 10px;color:var(--navy);font-weight:700;display:flex;align-items:center;justify-content:center}
+.week-controls button+button{border-left:1px solid var(--border)}
+.week-controls button:hover,.week-icon-button:hover{background:#eff9f7}
+.week-select{display:flex;gap:6px;align-items:center;color:#718096;border:1px solid var(--border);padding:0 8px;border-radius:9px;background:#fff}
+.week-select select{width:160px;border:0;padding:9px 3px;box-shadow:none}
+.week-date-picker{width:160px}
+.week-icon-button{border:1px solid var(--border);border-radius:9px;background:white;width:38px;height:38px;display:grid;place-items:center}
+.week-summary{border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#fbfcfd;padding:11px 22px;font-size:11px;color:#708198}
+.week-summary>span{display:inline-flex;align-items:center;gap:6px}
+.week-legend-dot{width:9px;height:9px;border-radius:3px;background:#93b4b0;display:inline-block}
+.week-legend-dot.is-confirmed{background:#1aa995}.week-legend-dot.is-pending{background:#e6ad46}.week-legend-dot.is-absence{background:#ac829f}.week-legend-dot.is-working{background:#b5e8de}
+.week-cancel-checkbox{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px}
+.week-cancel-checkbox input{width:14px;height:14px;accent-color:var(--teal)}
+.week-scroll{overflow:auto;max-height:790px;position:relative}
+.week-grid-header,.week-grid-content{display:grid;grid-template-columns:58px repeat(7,minmax(125px,1fr));min-width:940px}
+.week-grid-header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--border)}
+.week-hour-head{display:grid;place-items:center;color:#98aabb;border-right:1px solid var(--border)}
+.week-day-head{text-align:center;padding:10px 2px;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;min-height:75px}
+.week-day-head small{font-size:10px;letter-spacing:.09em;color:#8392a4;font-weight:800}
+.week-day-head strong{font-size:16px}.week-day-head span{font-size:10px;color:#149689;min-height:12px}
+.week-day-head.is-today{background:#eaf8f5}
+.week-time-axis{position:relative;border-right:1px solid var(--border)}
+.week-time-label{position:absolute;right:8px;transform:translateY(-50%);font-size:10px;color:#8b9aaa;font-weight:700}
+.week-day-lane{position:relative;border-right:1px solid #e5eaf0;background:repeating-linear-gradient(to bottom,#fff 0px,#fff 35px,#edf1f5 35px,#edf1f5 36px,#fff 36px,#fff 71px,#dce4ec 71px,#dce4ec 72px)}
+.week-day-lane.is-today{background:repeating-linear-gradient(to bottom,#f7fdfb 0px,#f7fdfb 35px,#edf1f5 35px,#edf1f5 36px,#f7fdfb 36px,#f7fdfb 71px,#dce4ec 71px,#dce4ec 72px)}
+.week-working-band{position:absolute;left:0;right:0;background:#d8f4ed66;border-left:3px solid #2ebba8;pointer-events:none}
+.week-closed-day{position:absolute;top:15px;left:5px;right:5px;text-align:center;font-size:11px;font-weight:700;color:#a66962;pointer-events:none}
+.week-event{position:absolute;z-index:2;text-align:left;display:flex;flex-direction:column;overflow:hidden;gap:1px;padding:6px 5px;border-radius:6px;border:1px solid #37bda8;border-left:3px solid #13a893;color:#12675e;background:#e2f7f2;font-size:10px}
+.week-event:hover{filter:brightness(.97);box-shadow:0 2px 9px #16253f22;z-index:3}
+.week-event strong{font-size:10px;white-space:normal;line-height:1.3}
+.week-event small,.week-event span{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.week-event.is-pending{background:#fff2d9;border-color:#dfb568;border-left-color:#d89c2d;color:#855c1a}
+.week-event.is-absence{background:#f4eaf3;border-color:#c9a9c3;border-left-color:#a4779d;color:#7a5576}
+.week-event.is-cancelled{background:#f4f5f7;border-color:#ccd5de;border-left-color:#8997a4;color:#697b89;text-decoration:line-through}
+.week-event.is-completed{background:#e7eef7;border-color:#a7bdd4;border-left-color:#537eac;color:#3a5c81}
+.week-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 22px;flex-wrap:wrap}
+.week-footer span{max-width:660px;color:#7e90a0;font-size:11px}
+.week-modal-backdrop{position:fixed;inset:0;background:#10203799;display:grid;place-items:center;z-index:99;padding:15px}
+.week-modal{width:min(480px,100%);background:#fff;border-radius:18px;padding:25px;box-shadow:0 20px 90px #08192b44}
+.week-modal-top{display:flex;justify-content:space-between;align-items:center}
+.week-modal-top button{border:0;background:#f2f5f8;border-radius:8px;width:34px;height:34px;display:grid;place-items:center}
+.week-modal-icon{width:43px;height:43px;border-radius:12px;background:#e7f6f3;color:#198b82;display:grid;place-items:center}
+.week-modal h2{margin:17px 0 9px}.week-modal dl{display:grid;grid-template-columns:110px 1fr;gap:11px;border-top:1px solid var(--border);padding:19px 0;margin-top:17px}
+.week-modal dt{font-weight:700;color:#8c9baa;font-size:12px}.week-modal dd{margin:0;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:650px){.week-toolbar{padding:13px}.week-summary{padding:9px 12px;gap:9px}.week-footer{padding:14px}.week-modal dl{grid-template-columns:84px 1fr}}
