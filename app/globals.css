@@ -8,3 +8,21 @@
 @media(max-width:560px){.stats-grid{gap:9px}.metric-card{padding:15px}.metric-card strong{font-size:27px}.metric-card .metric-icon{height:29px;width:29px}.people-grid{grid-template-columns:1fr}.panel{padding:17px}.page-title{flex-direction:column;gap:12px}.header-right{font-size:0;gap:9px}.header-right .live-dot{display:none}.form-cols{flex-wrap:wrap}.form-cols>label{flex:1 1 100px}.filters{align-items:stretch}.filters .search-box{flex:1 1 100%}.filters select{flex:1}.auth-shell{display:block}.auth-intro{display:none}.auth-panel{padding:35px 25px;min-height:420px}.auth-mobile-logo{display:flex;gap:10px;align-items:center;color:var(--navy);font-weight:800;margin-bottom:32px}.auth-screen{padding:15px}}
 /* Public booking compatibility */
 .page{max-width:1040px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;padding:15px 0 25px}.brand{font-weight:800}.card{padding:26px;background:white;border:1px solid var(--border);border-radius:16px}.auth.card{max-width:660px;margin:30px auto}.auth.card h1{font-size:27px}.auth.card label{margin:13px 0}.auth.card p{color:var(--muted)}.primary,.light{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 16px;border-radius:9px;font-weight:700;border:1px solid var(--border)}.primary{background:var(--navy);border-color:var(--navy);color:white}.light{background:white}.slots{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.slots button{min-width:85px}.auth.card form .primary{margin-top:15px}
+
+/* v0.3.1: intuitive employee detail workspace */
+.employee-detail{display:flex;flex-direction:column;gap:16px}
+.employee-detail .panel-heading{margin-bottom:0}
+.employee-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:#f2f6f8;border-radius:12px}
+.employee-tab{padding:10px 14px;border:0;border-radius:9px;background:transparent;color:#52677d;font-size:12px;font-weight:700}
+.employee-tab.is-active{background:#16253f;color:white;box-shadow:0 3px 8px #16253f18}
+.employee-form{max-width:780px;display:flex;flex-direction:column;gap:12px}
+.employee-form>p{font-size:13px;line-height:1.6;color:#697e90;margin:4px 0 12px}
+.employee-form h3{font-size:14px;margin:8px 0 0}
+.employee-day{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #dde5ee;border-radius:10px;padding:12px 15px;background:#fff}
+.employee-day>strong{flex:0 0 125px}
+.employee-day small{display:block;font-size:11px;color:#75869a;font-weight:400}
+.employee-shifts{display:flex;flex-wrap:wrap;gap:8px;flex:1;justify-content:flex-end}
+.shift-pill{display:inline-flex;gap:7px;align-items:center;background:#e7f7f4;color:#126c64;border-radius:8px;padding:6px 8px;font-size:12px;font-weight:700}
+.shift-pill button{background:transparent;border:0;color:inherit;display:flex;padding:0}
+.employee-form .form-stack{border-top:1px solid #e2e9f0;padding-top:16px;margin-top:10px}
+@media(max-width:560px){.employee-day{align-items:flex-start;flex-direction:column}.employee-shifts{justify-content:flex-start}.employee-tab{flex:1 1 auto}}
