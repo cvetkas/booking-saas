@@ -6,7 +6,17 @@ export async function context(slug:string){const client=db();const {data:company
 export async function availability(ctx:Awaited<ReturnType<typeof context>>,employeeId:string,serviceId:string,date:string){
  const {client,company,employees,services,links}=ctx;const service=services.find(s=>s.id===serviceId);if(!service||!employees.some(e=>e.id===employeeId)||!links.some(l=>l.employee_id===employeeId&&l.service_id===serviceId))throw new Error('Neveljavna storitev ali zaposleni');
  const tz=company.timezone||'Europe/Ljubljana';const local=DateTime.fromISO(date,{zone:tz});if(!local.isValid)throw new Error('Neveljaven datum');if(local.startOf('day')<DateTime.now().setZone(tz).startOf('day')||local> DateTime.now().setZone(tz).plus({days:60}))return [];
- const weekday=local.weekday%7;const {data:hours,error:he}=await client.from('working_hours').select('start_local,end_local').eq('employee_id',employeeId).eq('day_of_week',weekday);
+ const weekday=local.weekday%7;
+ const {data:regularHours,error:he}=await client.from('working_hours').select('start_local,end_local').eq('employee_id',employeeId).eq('day_of_week',weekday);
+ const {data:override,error:oe}=await client.from('employee_day_overrides').select('id,mode').eq('company_id',company.id).eq('employee_id',employeeId).eq('local_date',date).maybeSingle();
+ if(oe)throw new Error('Ni mogoče preveriti posebnega urnika');
+ if(override?.mode==='closed')return [];
+ let hours=regularHours||[];
+ if(override?.mode==='custom'){
+  const {data:customHours,error:ce}=await client.from('employee_day_override_shifts').select('start_local,end_local').eq('override_id',override.id).eq('company_id',company.id);
+  if(ce)throw new Error('Ni mogoče preveriti posebnega urnika');
+  hours=customHours||[];
+ }
  const beginning=local.startOf('day').toUTC().toISO()!,end=local.plus({days:1}).startOf('day').toUTC().toISO()!;
  const [bb,ab,cc]=await Promise.all([client.from('bookings').select('occupied_starts_at,occupied_ends_at').eq('employee_id',employeeId).in('status',['pending','confirmed']).lt('occupied_starts_at',end).gt('occupied_ends_at',beginning),client.from('availability_blocks').select('starts_at,ends_at').eq('employee_id',employeeId).lt('starts_at',end).gt('ends_at',beginning),client.from('calendar_connections').select('id').eq('employee_id',employeeId).eq('active',true).eq('check_busy',true).limit(1)]);
  if(he||bb.error||ab.error||cc.error)throw new Error('Ni mogoče preveriti razpoložljivosti');
