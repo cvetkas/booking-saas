@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 import {DateTime} from 'luxon';
-import {CalendarDays,ChevronLeft,ChevronRight,Clock3,ExternalLink,Filter,RefreshCcw,Users,X} from 'lucide-react';
+import {CalendarDays,ChevronLeft,ChevronRight,Clock3,ExternalLink,Maximize2,Minimize2,RefreshCcw,Users,X} from 'lucide-react';
 import {getSupabase} from '../lib/supabase';
 
 type Company={id:string;slug:string;timezone:string};
@@ -54,6 +54,7 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
  const zone=company.timezone||'Europe/Ljubljana';
  const [week,setWeek]=useState(()=>DateTime.now().setZone(zone).startOf('week').toISODate()||'2026-10-12');
  const [employeeFilter,setEmployeeFilter]=useState('all');
+ const [expanded,setExpanded]=useState(false),[compact,setCompact]=useState(true);
  const [showCancelled,setShowCancelled]=useState(false);
  const [bookings,setBookings]=useState<Reservation[]>([]);
  const [absences,setAbsences]=useState<Absence[]>([]);
@@ -94,7 +95,8 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
  const staffName=(id:string)=>employees.find(e=>e.id===id)?.name||'Neznan zaposleni';
  const serviceName=(id:string)=>services.find(s=>s.id===id)?.name||'Storitev';
  const timeTicks=Array.from({length:LAST_HOUR-FIRST_HOUR+1},(_,i)=>FIRST_HOUR+i);
- const totalHeight=(LAST_HOUR-FIRST_HOUR)*PIXELS_PER_HOUR;
+ const hourHeight=expanded&&compact?48:PIXELS_PER_HOUR;
+ const totalHeight=(LAST_HOUR-FIRST_HOUR)*hourHeight;
  const weekCaption=start.toFormat('dd. LL.')+' – '+end.minus({days:1}).toFormat('dd. LL. yyyy');
  const count=visibleBookings.filter(b=>b.status!=='cancelled').length;
  const eventForDay=(date:DateTime)=>{
@@ -123,7 +125,7 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
   }).filter(x=>x.end>x.start);
  };
  const isTodayInWeek=days.some(d=>d.toISODate()===today);
- return <div className="week-calendar">
+ return <div className={"week-calendar "+(expanded?"week-expanded":"")}>
   <div className="week-toolbar">
    <div className="week-toolbar-left"><div className="week-controls">
     <button aria-label="Prejšnji teden" title="Prejšnji teden" onClick={()=>setWeek(start.minus({days:7}).toISODate()!)}><ChevronLeft size={18}/></button>
@@ -133,6 +135,7 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
    <div className="week-toolbar-right">
     <label className="week-select"><Users size={16}/><select aria-label="Prikaz zaposlenega" value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)}><option value="all">Vsi zaposleni</option>{employees.map(e=><option key={e.id} value={e.id}>{e.name}{e.active?'':' (neaktiven)'}</option>)}</select></label>
     <input className="week-date-picker" aria-label="Pojdi na datum" type="date" value={week} onChange={e=>{if(e.target.value)setWeek(weekMonday(e.target.value,zone))}}/>
+    <button className="week-icon-button" type="button" title={expanded?"Zapri celozaslonski pogled":"Razširi koledar čez celoten zaslon"} aria-label={expanded?"Zapri celozaslonski pogled":"Celozaslonski koledar"} onClick={()=>setExpanded(v=>!v)}>{expanded?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button>
     <button className="week-icon-button" title="Osveži podatke" aria-label="Osveži" onClick={()=>setReload(i=>i+1)}><RefreshCcw size={17}/></button>
    </div>
   </div>
@@ -142,6 +145,7 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
    <span><span className="week-legend-dot is-pending"/> V čakanju</span>
    <span><span className="week-legend-dot is-absence"/> Odsotnost</span>
    {employeeFilter!=='all'&&<span><span className="week-legend-dot is-working"/> Delovni čas</span>}
+   {expanded&&<label className="week-cancel-checkbox"><input type="checkbox" checked={compact} onChange={e=>setCompact(e.target.checked)}/> Strnjen pogled (vse ure)</label>}
    <label className="week-cancel-checkbox"><input type="checkbox" checked={showCancelled} onChange={e=>setShowCancelled(e.target.checked)}/> Prikaži odpovedane</label>
   </div>
   {error&&<div className="alert error" role="alert">{error}</div>}
@@ -149,15 +153,15 @@ export default function WeeklyCalendar({company,employees,services,onOpenBooking
   <div className="week-scroll" aria-label="Tedenski koledar">
    <div className="week-grid-header"><div className="week-hour-head"><Clock3 size={15}/></div>{days.map((day,i)=><div key={i} className={'week-day-head '+(day.toISODate()===today?'is-today':'')}><small>{weekdays[i]}</small><strong>{day.toFormat('dd. LL.')}</strong><span>{day.toISODate()===today?'Danes':''}</span></div>)}</div>
    <div className="week-grid-content">
-    <div className="week-time-axis" style={{height:totalHeight}}>{timeTicks.map(hour=><div className="week-time-label" key={hour} style={{top:(hour-FIRST_HOUR)*PIXELS_PER_HOUR}}>{String(hour).padStart(2,'0')}:00</div>)}</div>
+    <div className="week-time-axis" style={{height:totalHeight}}>{timeTicks.map(hour=><div className="week-time-label" key={hour} style={{top:(hour-FIRST_HOUR)*hourHeight}}>{String(hour).padStart(2,'0')}:00</div>)}</div>
     {days.map((date,i)=><div className={'week-day-lane '+(date.toISODate()===today?'is-today':'')} style={{height:totalHeight}} key={date.toISODate()}>
-     {intervalsForDay(date).map((period,n)=><div className="week-working-band" key={n} title="Redni ali posebni delovni čas" style={{top:(period.start-FIRST_HOUR*60)*PIXELS_PER_HOUR/60,height:(period.end-period.start)*PIXELS_PER_HOUR/60}}/>)}
+     {intervalsForDay(date).map((period,n)=><div className="week-working-band" key={n} title="Redni ali posebni delovni čas" style={{top:(period.start-FIRST_HOUR*60)*hourHeight/60,height:(period.end-period.start)*hourHeight/60}}/>)}
      {employeeFilter!=='all'&&overrides.some(o=>o.employee_id===employeeFilter&&o.local_date===date.toISODate()&&o.mode==='closed')&&<div className="week-closed-day">Zaprt dan</div>}
      {eventForDay(date).map(e=><button
       type="button" key={e.key} onClick={()=>setSelected(e)}
       className={'week-event '+(e.kind==='absence'?'is-absence':'is-'+(e.booking?.status||'confirmed'))}
       title={e.kind==='booking'?serviceName(e.booking!.service_id)+' – '+e.booking!.customer_name:'Odsotnost – '+staffName(e.employee_id)}
-      style={{top:(e.start-FIRST_HOUR*60)*PIXELS_PER_HOUR/60+2,height:Math.max(20,(e.end-e.start)*PIXELS_PER_HOUR/60-4),left:`calc(${(e.column||0)*100/(e.columns||1)}% + 3px)`,width:`calc(${100/(e.columns||1)}% - 6px)`}}>
+      style={{top:(e.start-FIRST_HOUR*60)*hourHeight/60+2,height:Math.max(20,(e.end-e.start)*hourHeight/60-4),left:`calc(${(e.column||0)*100/(e.columns||1)}% + 3px)`,width:`calc(${100/(e.columns||1)}% - 6px)`}}>
       <strong>{timeOf(e.starts_at,zone)} {e.kind==='absence'?'Odsotnost':serviceName(e.booking!.service_id)}</strong>
       <small>{e.kind==='booking'?e.booking!.customer_name:e.absence?.reason||'Blokirano'}</small>
       {employeeFilter==='all'&&<span>{staffName(e.employee_id)}</span>}
