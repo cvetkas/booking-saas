@@ -36,7 +36,7 @@ export default function Home(){
    const client=getSupabase();
    client.auth.getUser().then(({data,error:e})=>{
     if(!mounted)return;
-    if(e)setError(e.message);setUser(data.user);setReady(true);
+    if(e&&e.name!=='AuthSessionMissingError'&&!/auth session missing/i.test(e.message))setError(e.message);setUser(data.user);setReady(true);
    }).catch(e=>{if(mounted){setError(errorText(e));setReady(true)}});
    const {data:{subscription}}=client.auth.onAuthStateChange((_event,session)=>{
     if(mounted){setUser(session?.user??null);if(!session){setCompanies([]);setCompanyId('')}}
