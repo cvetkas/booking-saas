@@ -78,3 +78,12 @@
 .week-modal h2{margin:17px 0 9px}.week-modal dl{display:grid;grid-template-columns:110px 1fr;gap:11px;border-top:1px solid var(--border);padding:19px 0;margin-top:17px}
 .week-modal dt{font-weight:700;color:#8c9baa;font-size:12px}.week-modal dd{margin:0;font-size:12px;overflow-wrap:anywhere}
 @media(max-width:650px){.week-toolbar{padding:13px}.week-summary{padding:9px 12px;gap:9px}.week-footer{padding:14px}.week-modal dl{grid-template-columns:84px 1fr}}
+
+/* Full viewport weekly calendar mode */
+.week-calendar.week-expanded{position:fixed;z-index:70;inset:0;border:0;border-radius:0;display:flex;flex-direction:column;background:#fff;box-shadow:none}
+.week-expanded .week-toolbar{flex-shrink:0}
+.week-expanded .week-summary{flex-shrink:0}
+.week-expanded .week-scroll{flex:1;min-height:0;max-height:none;overflow:auto}
+.week-expanded .week-grid-header,.week-expanded .week-grid-content{grid-template-columns:58px repeat(7,minmax(125px,1fr))}
+.week-expanded .week-footer{flex-shrink:0;border-top:1px solid var(--border)}
+@media(max-width:650px){.week-expanded .week-toolbar{padding:11px}.week-expanded .week-footer{padding:9px}}
