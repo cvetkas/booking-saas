@@ -101,3 +101,5 @@
 .manager-slots button{background:white;border:1px solid #badbd8;border-radius:9px;padding:9px 13px;color:#236b65;font-size:12px;font-weight:700}
 .manager-slots button.chosen{background:var(--teal);color:#fff;border-color:var(--teal)}
 @media(max-width:600px){.manager-columns{grid-template-columns:1fr}.manager-date{align-items:stretch;flex-direction:column}.manager-date label{min-width:0}}
+
+.service-team{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);max-width:740px}.service-team>p{font-size:12px;color:#718096}.service-success{display:flex;align-items:center;gap:6px;color:#09836a!important;font-weight:700}
