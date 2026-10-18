@@ -87,3 +87,17 @@
 .week-expanded .week-grid-header,.week-expanded .week-grid-content{grid-template-columns:58px repeat(7,minmax(125px,1fr))}
 .week-expanded .week-footer{flex-shrink:0;border-top:1px solid var(--border)}
 @media(max-width:650px){.week-expanded .week-toolbar{padding:11px}.week-expanded .week-footer{padding:9px}}
+
+/* Booking administration actions */
+.manager-panel{border-color:#cbdfe5}
+.manager-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.manager-tabs button{display:flex;gap:7px;align-items:center;padding:10px 13px;border:1px solid var(--border);border-radius:9px;background:#f8fafc;color:#496074;font-size:12px;font-weight:700}
+.manager-tabs button.active{background:var(--navy);color:white;border-color:var(--navy)}
+.manager-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.manager-date{display:flex;gap:12px;align-items:flex-end;margin:15px 0}
+.manager-date label{min-width:200px}
+.manager-date button{height:42px}
+.manager-slots{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.manager-slots button{background:white;border:1px solid #badbd8;border-radius:9px;padding:9px 13px;color:#236b65;font-size:12px;font-weight:700}
+.manager-slots button.chosen{background:var(--teal);color:#fff;border-color:var(--teal)}
+@media(max-width:600px){.manager-columns{grid-template-columns:1fr}.manager-date{align-items:stretch;flex-direction:column}.manager-date label{min-width:0}}
