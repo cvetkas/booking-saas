@@ -42,7 +42,7 @@ export async function POST(req:NextRequest){
   if(co||!company)return fail('Podjetja ni mogoče najti.',404);
   const ctx=await context(company.slug);
   const when=DateTime.fromISO(start,{setZone:true});
-  if(!when.isValid||!when.isFinite)return fail('Neveljaven termin.',400);
+  if(!when.isValid)return fail('Neveljaven termin.',400);
   const localDate=when.setZone(ctx.company.timezone).toISODate();
   if(!localDate)return fail('Neveljaven datum.',400);
   const slots=await availability(ctx,employee,service,localDate,action==='reschedule'?bookingId:undefined);
