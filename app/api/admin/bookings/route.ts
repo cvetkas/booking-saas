@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {DateTime} from 'luxon';
 import {availability,context,db} from '../../../../lib/booking-server';
+import {notifyBooking} from '../../../../lib/booking-notifications';
 export const runtime='nodejs';
 const fail=(error:string,status:number)=>NextResponse.json({error},{status,headers:{'Cache-Control':'no-store'}});
 async function authorize(req:NextRequest,companyId:string){
@@ -28,9 +29,10 @@ export async function POST(req:NextRequest){
    existing=data;
    if(existing.status==='cancelled')return fail('Rezervacija je že odpovedana.',409);
    if(action==='cancel'){
-    const {data:updated,error:ce}=await client.from('bookings').update({status:'cancelled'}).eq('id',bookingId).eq('company_id',companyId).neq('status','cancelled').select('id').maybeSingle();
+    const {data:updated,error:ce}=await client.from('bookings').update({status:'cancelled'}).eq('id',bookingId).eq('company_id',companyId).neq('status','cancelled').select('id,company_id,employee_id,service_id,customer_name,customer_email,starts_at,ends_at').maybeSingle();
     if(ce)throw ce;
     if(!updated)return fail('Rezervacija je bila medtem spremenjena.',409);
+    await notifyBooking(updated,'cancelled').catch(()=>null);
     return NextResponse.json({ok:true});
    }
   }
@@ -55,11 +57,13 @@ export async function POST(req:NextRequest){
   const occupied_ends_at=when.plus({minutes:svc.duration_minutes+svc.buffer_after_minutes}).toUTC().toISO();
   const payload={starts_at,ends_at,occupied_starts_at,occupied_ends_at};
   if(action==='reschedule'){
-   const {error}=await client.from('bookings').update(payload).eq('company_id',companyId).eq('id',bookingId);
+   const {data:updated,error}=await client.from('bookings').update(payload).eq('company_id',companyId).eq('id',bookingId).select('id,company_id,employee_id,service_id,customer_name,customer_email,starts_at,ends_at').single();
    if(error){if(error.code==='23P01')return fail('Termin je medtem nekdo zasedel.',409);throw error}
+   if(updated)await notifyBooking(updated,'rescheduled').catch(()=>null);
   }else{
-   const {error}=await client.from('bookings').insert({...payload,company_id:companyId,employee_id:employee,service_id:service,customer_name:name.trim(),customer_email:email.trim(),status:'confirmed',customer_timezone:ctx.company.timezone});
+   const {data:created,error}=await client.from('bookings').insert({...payload,company_id:companyId,employee_id:employee,service_id:service,customer_name:name.trim(),customer_email:email.trim(),status:'confirmed',customer_timezone:ctx.company.timezone}).select('id,company_id,employee_id,service_id,customer_name,customer_email,starts_at,ends_at').single();
    if(error){if(error.code==='23P01')return fail('Termin je medtem nekdo zasedel.',409);throw error}
+   if(created)await notifyBooking(created,'confirmed').catch(()=>null);
   }
   return NextResponse.json({ok:true});
  }catch(e){
