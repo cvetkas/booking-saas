@@ -5,7 +5,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.calendar_oauth_states (
   state_hash text PRIMARY KEY,
   company_id uuid NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
-  employee_id uuid NOT NULL,
+  employee_id uuid NOT NULL REFERENCES public.employees(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   provider text NOT NULL CHECK(provider IN ('google','microsoft')),
   code_verifier text NOT NULL,
@@ -13,8 +13,6 @@ CREATE TABLE IF NOT EXISTS public.calendar_oauth_states (
   created_at timestamptz NOT NULL DEFAULT now(),
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '10 minutes'),
   consumed_at timestamptz,
-  FOREIGN KEY (company_id, employee_id)
-    REFERENCES public.employees(company_id, id) ON DELETE CASCADE,
   CHECK (expires_at > created_at)
 );
 CREATE INDEX IF NOT EXISTS calendar_oauth_states_expiry_idx
