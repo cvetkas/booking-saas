@@ -23,7 +23,7 @@ export async function availability(ctx:Awaited<ReturnType<typeof context>>,emplo
  if(he||bb.error||ab.error||cc.error)throw new Error('Ni mogoče preveriti razpoložljivosti');
  // Fail closed until connected calendar integration is implemented.
  if((cc.data||[]).length)throw new Error('Zunanji koledar še ni integriran; rezervacije so za tega zaposlenega začasno onemogočene.');
- const remote=await externalBusy(company.id,employeeId,beginning,end);
+ const remote=process.env.CALENDAR_SYNC_ENABLED==='true'?await externalBusy(company.id,employeeId,beginning,end):[];
  const busy=[...remote,...(bb.data||[]).filter(b=>b.id!==excludeBookingId).map(b=>[DateTime.fromISO(b.occupied_starts_at).toMillis(),DateTime.fromISO(b.occupied_ends_at).toMillis()]),...(ab.data||[]).map(b=>[DateTime.fromISO(b.starts_at).toMillis(),DateTime.fromISO(b.ends_at).toMillis()])];
  const out:string[]=[];for(const h of hours||[]){const [sh,sm]=h.start_local.split(':').map(Number),[eh,em]=h.end_local.split(':').map(Number);let t=local.set({hour:sh,minute:sm,second:0,millisecond:0});const finish=local.set({hour:eh,minute:em,second:0,millisecond:0});while(t.plus({minutes:service.duration_minutes})<=finish){const a=t.minus({minutes:service.buffer_before_minutes}).toMillis(),b=t.plus({minutes:service.duration_minutes+service.buffer_after_minutes}).toMillis();if(t> DateTime.now().setZone(tz).plus({minutes:30})&&!busy.some(([x,y])=>a<y&&b>x)&&!out.includes(t.toUTC().toISO()!))out.push(t.toUTC().toISO()!);t=t.plus({minutes:30})}}
  return out.sort();}
