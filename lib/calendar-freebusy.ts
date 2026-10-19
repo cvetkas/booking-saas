@@ -1,5 +1,6 @@
 import {createDecipheriv} from 'node:crypto';
-import {db} from './booking-server';
+import {createClient} from '@supabase/supabase-js';
+const db=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.SUPABASE_SERVICE_ROLE_KEY!,{auth:{autoRefreshToken:false,persistSession:false}});
 type Credential={id:string;provider:'google'|'microsoft';access_token_ciphertext:string;refresh_token_ciphertext:string|null;expires_at:string|null};
 type Busy=[number,number];
 function decrypt(value:string):string{
@@ -52,8 +53,8 @@ export async function externalBusy(companyId:string,employeeId:string,from:strin
    if(!Array.isArray(result?.value)||result['@odata.nextLink'])throw Error('Microsoft koledar vsebuje preveč dogodkov; preverjanje ni dokončano.');
    for(const item of result.value){
     if(item.isCancelled||item.showAs==='free')continue;
-    const a=Date.parse((item.start?.dateTime||'').replace(/Z?$/,'Z'));
-    const z=Date.parse((item.end?.dateTime||'').replace(/Z?$/,'Z'));
+    const a=Date.parse((item.start?.dateTime||'').replace(/(Z|[+-]\\d\\d:\\d\\d)?$/,(zone:string)=>zone||'Z'));
+    const z=Date.parse((item.end?.dateTime||'').replace(/(Z|[+-]\\d\\d:\\d\\d)?$/,(zone:string)=>zone||'Z'));
     if(!Number.isFinite(a)||!Number.isFinite(z))throw Error('Neveljaven datum Microsoft Calendar.');
     combined.push([a,z]);
    }
