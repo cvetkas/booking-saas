@@ -1,4 +1,4 @@
-import {createDecipheriv} from 'node:crypto';
+import {createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
 import {createClient} from '@supabase/supabase-js';
 const db=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.SUPABASE_SERVICE_ROLE_KEY!,{auth:{autoRefreshToken:false,persistSession:false}});
 type Credential={id:string;provider:'google'|'microsoft';access_token_ciphertext:string;refresh_token_ciphertext:string|null;expires_at:string|null};
@@ -13,8 +13,32 @@ function decrypt(value:string):string{
 }
 async function tokenFor(c:Credential):Promise<string>{
  if(c.expires_at&&new Date(c.expires_at).getTime()>Date.now()+120000)return decrypt(c.access_token_ciphertext);
- // Fail closed: token renewal with encrypted persistence is required before expiry.
- throw Error('Povezava s koledarjem je potekla; ponovno povezovanje oziroma osvežitev žetona še ni na voljo.');
+ if(!c.refresh_token_ciphertext)throw Error('Povezavo s koledarjem je treba ponovno avtorizirati.');
+ const refresh=decrypt(c.refresh_token_ciphertext);
+ const google=c.provider==='google';
+ const clientId=google?process.env.GOOGLE_CALENDAR_CLIENT_ID:process.env.MICROSOFT_CALENDAR_CLIENT_ID;
+ const secret=google?process.env.GOOGLE_CALENDAR_CLIENT_SECRET:process.env.MICROSOFT_CALENDAR_CLIENT_SECRET;
+ if(!clientId||!secret)throw Error('OAuth nastavitve za osvežitev žetona manjkajo.');
+ const url=google?'https://oauth2.googleapis.com/token':'https://login.microsoftonline.com/common/oauth2/v2.0/token';
+ const payload=new URLSearchParams({client_id:clientId,client_secret:secret,grant_type:'refresh_token',refresh_token:refresh});
+ const reply=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:payload,cache:'no-store'});
+ if(!reply.ok)throw Error('Koledarski račun potrebuje ponovno povezavo (osvežitev ni uspela).');
+ const result=await reply.json();
+ if(typeof result.access_token!=='string'||!result.access_token)throw Error('Ponudnik ni vrnil dostopnega žetona.');
+ const key=process.env.CALENDAR_TOKEN_ENCRYPTION_KEY!;
+ const encrypt=(value:string)=>{
+  const nonce=randomBytes(12),cipher=createCipheriv('aes-256-gcm',Buffer.from(key,'hex'),nonce);
+  return Buffer.concat([nonce,cipher.getAuthTag(),cipher.update(value,'utf8'),cipher.final()]).toString('base64');
+ };
+ const update:{access_token_ciphertext:string;expires_at:string;refresh_token_ciphertext?:string}={
+  access_token_ciphertext:encrypt(result.access_token),
+  expires_at:new Date(Date.now()+Math.max(60,Number(result.expires_in)||3600)*1000).toISOString()
+ };
+ if(typeof result.refresh_token==='string'&&result.refresh_token)update.refresh_token_ciphertext=encrypt(result.refresh_token);
+ const client=db();
+ const {error}=await client.from('calendar_oauth_credentials').update(update).eq('id',c.id);
+ if(error)throw Error('Osveženega žetona ni mogoče shraniti.');
+ return result.access_token;
 }
 async function jsonResponse(url:string,token:string,options?:RequestInit):Promise<any>{
  const controller=new AbortController();const t=setTimeout(()=>controller.abort(),7000);
