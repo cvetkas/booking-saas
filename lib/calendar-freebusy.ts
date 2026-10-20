@@ -28,7 +28,8 @@ async function tokenFor(c:Credential):Promise<string>{
  const key=process.env.CALENDAR_TOKEN_ENCRYPTION_KEY!;
  const encrypt=(value:string)=>{
   const nonce=randomBytes(12),cipher=createCipheriv('aes-256-gcm',Buffer.from(key,'hex'),nonce);
-  return Buffer.concat([nonce,cipher.getAuthTag(),cipher.update(value,'utf8'),cipher.final()]).toString('base64');
+  const encrypted=Buffer.concat([cipher.update(value,'utf8'),cipher.final()]);
+  return Buffer.concat([nonce,cipher.getAuthTag(),encrypted]).toString('base64');
  };
  const update:{access_token_ciphertext:string;expires_at:string;refresh_token_ciphertext?:string}={
   access_token_ciphertext:encrypt(result.access_token),
