@@ -11,7 +11,7 @@ function decrypt(value:string):string{
  cipher.setAuthTag(data.subarray(12,28));
  return Buffer.concat([cipher.update(data.subarray(28)),cipher.final()]).toString('utf8');
 }
-async function tokenFor(c:Credential):Promise<string>{
+export async function tokenFor(c:Credential):Promise<string>{
  if(c.expires_at&&new Date(c.expires_at).getTime()>Date.now()+120000)return decrypt(c.access_token_ciphertext);
  if(!c.refresh_token_ciphertext)throw Error('Povezavo s koledarjem je treba ponovno avtorizirati.');
  const refresh=decrypt(c.refresh_token_ciphertext);
