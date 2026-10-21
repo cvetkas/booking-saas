@@ -15,7 +15,7 @@ async function processJob(job:Job){
   .select('id,provider,access_token_ciphertext,refresh_token_ciphertext,expires_at')
   .eq('company_id',job.company_id).eq('employee_id',booking.employee_id).eq('provider','google').maybeSingle();
  if(ce)throw Error('Google credential lookup failed');
- if(!credentials)return;
+ if(!credentials)throw Error('Google calendar connection missing for employee');
  const token=await tokenFor(credentials);
  const eventId=googleEventId(booking.id);
  const endpoint='https://www.googleapis.com/calendar/v3/calendars/primary/events/'+eventId;
