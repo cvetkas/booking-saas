@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {db} from '../../../../lib/booking-server';
-import {processJob} from '../sync/route';
+import {processJob} from '../../../../lib/calendar-event-worker';
 export const runtime='nodejs';
 export const maxDuration=60;
 export async function POST(req:NextRequest){
