@@ -17,11 +17,13 @@ REVOKE ALL ON public.booking_calendar_jobs FROM PUBLIC,anon,authenticated;
 CREATE OR REPLACE FUNCTION public.queue_booking_calendar_change() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
- IF TG_OP = 'INSERT' OR
-    (NEW.starts_at,NEW.ends_at,NEW.status,NEW.employee_id,NEW.service_id)
+ IF TG_OP = 'INSERT' THEN
+  INSERT INTO public.booking_calendar_jobs(booking_id,company_id)
+   VALUES(NEW.id,NEW.company_id)
+   ON CONFLICT (booking_id) DO NOTHING;
+ ELSIF (NEW.starts_at,NEW.ends_at,NEW.status,NEW.employee_id,NEW.service_id)
     IS DISTINCT FROM
-    (OLD.starts_at,OLD.ends_at,OLD.status,OLD.employee_id,OLD.service_id)
- THEN
+    (OLD.starts_at,OLD.ends_at,OLD.status,OLD.employee_id,OLD.service_id) THEN
   INSERT INTO public.booking_calendar_jobs(booking_id,company_id)
    VALUES(NEW.id,NEW.company_id)
    ON CONFLICT (booking_id) DO UPDATE SET
