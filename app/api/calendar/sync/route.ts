@@ -5,7 +5,7 @@ export const runtime='nodejs';
 export const maxDuration=60;
 type Job={booking_id:string;company_id:string;revision:number;attempts:number};
 const googleEventId=(uuid:string)=>'b'+uuid.replace(/-/g,'');
-async function processJob(job:Job){
+export async function processJob(job:Job){
  const client=db();
  const {data:booking,error:be}=await client.from('bookings')
   .select('id,company_id,employee_id,service_id,customer_name,starts_at,ends_at,status')
