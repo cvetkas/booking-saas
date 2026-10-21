@@ -20,9 +20,8 @@ async function processJob(job:Job){
  const eventId=googleEventId(booking.id);
  const endpoint='https://www.googleapis.com/calendar/v3/calendars/primary/events/'+eventId;
  const headers={Authorization:'Bearer '+token,'Content-Type':'application/json'};
- const timeout=AbortSignal.timeout(10000);
  if(booking.status==='cancelled'){
-  const response=await fetch(endpoint,{method:'DELETE',headers,signal:timeout});
+  const response=await fetch(endpoint,{method:'DELETE',headers,signal:AbortSignal.timeout(10000)});
   if(!response.ok&&response.status!==404&&response.status!==410)throw Error('Google cancellation failed: '+response.status);
   return;
  }
@@ -34,7 +33,7 @@ async function processJob(job:Job){
  const body={id:eventId,summary:sr.data.name+' – '+cr.data.name,
   description:'Bookiry rezervacija\nStranka: '+booking.customer_name,
   start:{dateTime:booking.starts_at},end:{dateTime:booking.ends_at}};
- const response=await fetch(endpoint,{method:'PUT',headers,body:JSON.stringify(body),signal:timeout});
+ const response=await fetch(endpoint,{method:'PUT',headers,body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
  if(response.ok)return;
  if(response.status===404){
   const created=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',
