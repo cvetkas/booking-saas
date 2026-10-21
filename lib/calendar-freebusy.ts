@@ -49,7 +49,7 @@ async function jsonResponse(url:string,token:string,options?:RequestInit):Promis
   return await r.json();
  }finally{clearTimeout(t)}
 }
-export async function externalBusy(companyId:string,employeeId:string,from:string,to:string):Promise<Busy[]>{
+export async function externalBusy(companyId:string,employeeId:string,from:string,to:string,excludeBookingId?:string):Promise<Busy[]>{
  const client=db();
  const {data,error}=await client.from('calendar_oauth_credentials')
   .select('id,provider,access_token_ciphertext,refresh_token_ciphertext,expires_at')
@@ -59,7 +59,22 @@ export async function externalBusy(companyId:string,employeeId:string,from:strin
  for(const c of (data||[]) as Credential[]){
   const token=await tokenFor(c);
   if(c.provider==='google'){
-   const result=await jsonResponse('https://www.googleapis.com/calendar/v3/freeBusy',token,{
+   if(excludeBookingId){
+   const url=new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events');
+   url.searchParams.set('timeMin',from);url.searchParams.set('timeMax',to);url.searchParams.set('singleEvents','true');url.searchParams.set('maxResults','2500');
+   const result=await jsonResponse(url.toString(),token);
+   if(!Array.isArray(result.items)||result.nextPageToken)throw Error('Preveč Google dogodkov za varno preverjanje terminov.');
+   const ownId='b'+excludeBookingId.replace(/-/g,'');
+   for(const event of result.items){
+    if(event.id===ownId||event.status==='cancelled'||event.transparency==='transparent')continue;
+    const a=Date.parse(event.start?.dateTime||event.start?.date||'');
+    const z=Date.parse(event.end?.dateTime||event.end?.date||'');
+    if(!Number.isFinite(a)||!Number.isFinite(z))throw Error('Neveljavni podatki Google koledarja.');
+    combined.push([a,z]);
+   }
+   continue;
+  }
+  const result=await jsonResponse('https://www.googleapis.com/calendar/v3/freeBusy',token,{
     method:'POST',body:JSON.stringify({timeMin:from,timeMax:to,items:[{id:'primary'}]})
    });
    const calendar=result?.calendars?.primary;
